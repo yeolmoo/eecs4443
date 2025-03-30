@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "BravoProject"
 include(":app")
+ 
