@@ -46,16 +46,18 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
 
         holder.itemView.setOnClickListener(v -> {
             try {
-                Class<?> activityClass = Class.forName("com.example.bravoproject." + item.getActivityClassName());
-                Intent intent = new Intent(context, activityClass);
+//                Class<?> activityClass = Class.forName("com.example.bravoproject." + item.getActivityClassName());
+//                Intent intent = new Intent(context, activityClass);
+                Intent intent = new Intent(context, InstructionActivity.class);
                 intent.putExtra("participant_id", participantId);
                 intent.putExtra("condition", condition);
+                intent.putExtra("menu_name", item.getActivityClassName());
                 intent.putExtra("menu_type", item.getMenuName());
                 intent.putExtra("start_time", SystemClock.elapsedRealtime());
 
                 ((MenuTestActivity) context).startActivityForResult(intent, 100);
-
-            } catch (ClassNotFoundException e) {
+//                ClassNotFoundException
+            } catch (Exception e) {
                 Toast.makeText(context, "Activity not found: " + item.getActivityClassName(), Toast.LENGTH_SHORT).show();
             }
         });
