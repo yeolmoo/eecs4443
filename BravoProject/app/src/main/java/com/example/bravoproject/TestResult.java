@@ -16,6 +16,16 @@ public class TestResult {
 
     private String feedback;
 
+    public String getHandedness() {
+        return handedness;
+    }
+
+    public void setHandedness(String handedness) {
+        this.handedness = handedness;
+    }
+
+    private String handedness;
+
 
     public TestResult(int id, String participantId, String condition, String menuType, long navigationTimeMs, int misclicks, boolean completed, int batteryStart, int batteryEnd, int comfortScore, int fatigueScore, String timestamp) {
         this.id = id;

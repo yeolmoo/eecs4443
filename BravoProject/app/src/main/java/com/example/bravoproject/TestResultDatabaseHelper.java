@@ -43,6 +43,7 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_FATIGUE_SCORE = "fatigue_score";
     private static final String COLUMN_TIMESTAMP = "timestamp";
 
+    private static final String COLUMN_HANDEDNESS = "handedness";
     private static final String COLUMN_FEEDBACK = "feedback";
 
     public TestResultDatabaseHelper(Context context) {
@@ -65,7 +66,8 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
                         COLUMN_BATTERY_END + " INTEGER, " +
                         COLUMN_COMFORT_SCORE + " INTEGER, " +
                         COLUMN_FATIGUE_SCORE + " INTEGER, " +
-                        COLUMN_TIMESTAMP + " TEXT,"+
+                        COLUMN_HANDEDNESS + " TEXT, "+
+                        COLUMN_TIMESTAMP + " TEXT, "+
                         COLUMN_FEEDBACK + " TEXT)";
         db.execSQL(CREATE_TABLE);
     }
@@ -94,6 +96,7 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_TIMESTAMP, result.getTimestamp());
         values.put(COLUMN_FEEDBACK, result.getFeedback());
 
+        values.put(COLUMN_HANDEDNESS, result.getHandedness());
         db.insert(TABLE_NAME, null, values);
         db.close();
     }
@@ -159,6 +162,7 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         result.setComfortScore(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_COMFORT_SCORE)));
         result.setFatigueScore(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_FATIGUE_SCORE)));
         result.setTimestamp(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIMESTAMP)));
+        result.setHandedness(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_HANDEDNESS)));
 
         result.setFeedback(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FEEDBACK)));
         return result;
@@ -187,7 +191,8 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
             writer = new BufferedWriter(new OutputStreamWriter(fileOutputStream));
 
             // write column headers
-            writer.write("participant_id, condition, menu_type, navigation_time_ms, misclicks, comfort_score, fatigue_score, timestamp\n");
+            writer.write("participant_id, condition, menu_type, navigation_time_ms, misclicks, comfort_score, fatigue_score, timestamp, handedness\n");
+
 
             // write data rows
             while (cursor.moveToNext()) {
@@ -200,8 +205,10 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
                 int fatigueScore = cursor.getInt(cursor.getColumnIndex("fatigue_score"));
                 String timestamp = cursor.getString(cursor.getColumnIndex("timestamp"));
 
-                writer.write(String.format("%s, %s, %s, %d, %d, %d, %d, %s\n",
-                        participantId, condition, menuType, navigationTime, misclicks, comfortScore, fatigueScore, timestamp));
+                String handedness = cursor.getString(cursor.getColumnIndex("Handedness"));
+
+                writer.write(String.format("%s, %s, %s, %d, %d, %d, %d, %s, %s\n",
+                        participantId, condition, menuType, navigationTime, misclicks, comfortScore, fatigueScore, timestamp, handedness));
             }
         } catch (IOException e) {
             e.printStackTrace();

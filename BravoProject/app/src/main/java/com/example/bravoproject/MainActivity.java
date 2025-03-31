@@ -7,11 +7,15 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
+    private RadioGroup handednessGroup;
+    private RadioButton radioLeft, radioRight;
 
     private EditText editFirstName;
     private Button buttonNext;
@@ -24,6 +28,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        handednessGroup = findViewById(R.id.handednessGroup);
+        radioLeft = findViewById(R.id.radioLeft);
+        radioRight = findViewById(R.id.radioRight);
         editFirstName = findViewById(R.id.editFirstName);
         buttonNext = findViewById(R.id.buttonNext);
         buttonDownloadData = findViewById(R.id.buttonDownloadData);
@@ -36,10 +43,20 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
+            int selectedId = handednessGroup.getCheckedRadioButtonId();
+            if (selectedId == -1) {
+                Toast.makeText(this, "Please select your handedness", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String handedness = (selectedId == R.id.radioLeft) ? "Left" : "Right";
+
+
+
             // Save unique name in SharedPreferences
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
             int count = 1;
             String uniqueName = name;
+
             while (prefs.contains("name_" + uniqueName)) {
                 count++;
                 uniqueName = name + count;
@@ -48,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = prefs.edit();
             editor.putString("current_name", uniqueName);
             editor.putString("name_" + uniqueName, "used");
+            editor.putString("handedness_" + uniqueName, handedness);
+
             editor.apply();
 
             // Navigate to next page
