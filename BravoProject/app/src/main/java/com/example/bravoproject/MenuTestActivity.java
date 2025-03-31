@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -18,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 public class MenuTestActivity extends AppCompatActivity {
 
@@ -39,14 +41,21 @@ public class MenuTestActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerViewMenus);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        TextView textCondition = findViewById(R.id.textCondition);
+        if(Objects.equals(condition, "sitting")){
+            textCondition.setText("Sitting Test");
+        } else {
+            textCondition.setText("Walking Test");
+        }
+
+
         menuList = new ArrayList<>();
         menuList.add(new MenuItem("Hamburger Menu", "HamburgerMenuActivity"));
         menuList.add(new MenuItem("Top Navigation", "TopNavActivity"));
         menuList.add(new MenuItem("Bottom Navigation", "BottomNavActivity"));
         menuList.add(new MenuItem("Floating Action Button", "FabActivity"));
-        menuList.add(new MenuItem("Swipe Menu", "SwipeMenuActivity"));
         menuList.add(new MenuItem("Radial Menu", "RadialMenuActivity"));
-
+//        menuList.add(new MenuItem("Swipe Menu", "SwipeMenuActivity"));
         adapter = new MenuAdapter(this, menuList, participantId, condition);
         recyclerView.setAdapter(adapter);
     }
