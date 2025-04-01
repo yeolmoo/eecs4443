@@ -12,8 +12,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.bravoproject.TestResult;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -42,12 +40,13 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_COMFORT_SCORE = "comfort_score";
     private static final String COLUMN_FATIGUE_SCORE = "fatigue_score";
     private static final String COLUMN_TIMESTAMP = "timestamp";
-
     private static final String COLUMN_FEEDBACK = "feedback";
+    private static final String COLUMN_CPU_USAGE = "cpu_usage";
+    private static final String COLUMN_MEMORY_USED = "memory_used_kb";
 
     public TestResultDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        this.context=context;
+        this.context = context;
     }
 
     @Override
@@ -65,7 +64,9 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
                         COLUMN_BATTERY_END + " INTEGER, " +
                         COLUMN_COMFORT_SCORE + " INTEGER, " +
                         COLUMN_FATIGUE_SCORE + " INTEGER, " +
-                        COLUMN_TIMESTAMP + " TEXT,"+
+                        COLUMN_CPU_USAGE + " INTEGER, " +
+                        COLUMN_MEMORY_USED + " INTEGER, " +
+                        COLUMN_TIMESTAMP + " TEXT, " +
                         COLUMN_FEEDBACK + " TEXT)";
         db.execSQL(CREATE_TABLE);
     }
@@ -76,7 +77,6 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Insert
     public void insertTestResult(TestResult result) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -91,6 +91,8 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_BATTERY_END, result.getBatteryEnd());
         values.put(COLUMN_COMFORT_SCORE, result.getComfortScore());
         values.put(COLUMN_FATIGUE_SCORE, result.getFatigueScore());
+        values.put(COLUMN_CPU_USAGE, result.getCpuUsage());
+        values.put(COLUMN_MEMORY_USED, result.getMemoryUsedKB());
         values.put(COLUMN_TIMESTAMP, result.getTimestamp());
         values.put(COLUMN_FEEDBACK, result.getFeedback());
 
@@ -98,7 +100,6 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    // Get all
     public List<TestResult> getAllResults() {
         List<TestResult> results = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -106,8 +107,7 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
 
         if (cursor.moveToFirst()) {
             do {
-                TestResult result = cursorToResult(cursor);
-                results.add(result);
+                results.add(cursorToResult(cursor));
             } while (cursor.moveToNext());
         }
 
@@ -116,7 +116,6 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         return results;
     }
 
-    // Get by participant
     public List<TestResult> getResultsByParticipant(String participantId) {
         List<TestResult> results = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -126,8 +125,7 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
 
         if (cursor.moveToFirst()) {
             do {
-                TestResult result = cursorToResult(cursor);
-                results.add(result);
+                results.add(cursorToResult(cursor));
             } while (cursor.moveToNext());
         }
 
@@ -136,14 +134,12 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         return results;
     }
 
-    // Delete all
     public void deleteAllResults() {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_NAME, null, null);
         db.close();
     }
 
-    // Convert cursor row to object
     private TestResult cursorToResult(Cursor cursor) {
         TestResult result = new TestResult();
 
@@ -158,14 +154,15 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         result.setBatteryEnd(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BATTERY_END)));
         result.setComfortScore(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_COMFORT_SCORE)));
         result.setFatigueScore(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_FATIGUE_SCORE)));
+        result.setCpuUsage(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CPU_USAGE)));
+        result.setMemoryUsedKB(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_MEMORY_USED)));
         result.setTimestamp(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIMESTAMP)));
-
         result.setFeedback(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FEEDBACK)));
+
         return result;
     }
 
     public void exportToCSV() {
-        // Check if permission is granted (for Android 6.0 and above)
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
 
@@ -175,47 +172,33 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         }
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM test_results", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME, null);
 
-        FileOutputStream fileOutputStream = null;
-        BufferedWriter writer = null;
+        try (FileOutputStream fos = new FileOutputStream(new File(context.getExternalFilesDir(null), "test_results.csv"));
+             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos))) {
 
-        try {
-            // set location in the app's private external directory
-            File file = new File(context.getExternalFilesDir(null), "test_results.csv");
-            fileOutputStream = new FileOutputStream(file);
-            writer = new BufferedWriter(new OutputStreamWriter(fileOutputStream));
+            writer.write("participant_id, condition, menu_type, navigation_time_ms, misclicks, cpu_usage_ms, memory_used_kb, comfort_score, fatigue_score, timestamp, feedback\n");
 
-            // write column headers
-            writer.write("participant_id, condition, menu_type, navigation_time_ms, misclicks, comfort_score, fatigue_score, timestamp\n");
-
-            // write data rows
             while (cursor.moveToNext()) {
-                String participantId = cursor.getString(cursor.getColumnIndex("participant_id"));
-                String condition = cursor.getString(cursor.getColumnIndex("condition"));
-                String menuType = cursor.getString(cursor.getColumnIndex("menu_type"));
-                long navigationTime = cursor.getLong(cursor.getColumnIndex("navigation_time_ms"));
-                int misclicks = cursor.getInt(cursor.getColumnIndex("misclicks"));
-                int comfortScore = cursor.getInt(cursor.getColumnIndex("comfort_score"));
-                int fatigueScore = cursor.getInt(cursor.getColumnIndex("fatigue_score"));
-                String timestamp = cursor.getString(cursor.getColumnIndex("timestamp"));
-
-                writer.write(String.format("%s, %s, %s, %d, %d, %d, %d, %s\n",
-                        participantId, condition, menuType, navigationTime, misclicks, comfortScore, fatigueScore, timestamp));
+                writer.write(String.format("%s, %s, %s, %d, %d, %d, %d, %d, %d, %s, %s\n",
+                        cursor.getString(cursor.getColumnIndex(COLUMN_PARTICIPANT_ID)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_CONDITION)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_MENU_TYPE)),
+                        cursor.getLong(cursor.getColumnIndex(COLUMN_NAV_TIME)),
+                        cursor.getInt(cursor.getColumnIndex(COLUMN_MISCLICKS)),
+                        cursor.getLong(cursor.getColumnIndex(COLUMN_CPU_USAGE)),
+                        cursor.getLong(cursor.getColumnIndex(COLUMN_MEMORY_USED)),
+                        cursor.getInt(cursor.getColumnIndex(COLUMN_COMFORT_SCORE)),
+                        cursor.getInt(cursor.getColumnIndex(COLUMN_FATIGUE_SCORE)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_TIMESTAMP)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_FEEDBACK))
+                ));
             }
+
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (writer != null) writer.close();
-                if (fileOutputStream != null) fileOutputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
 
         cursor.close();
     }
-
-
 }

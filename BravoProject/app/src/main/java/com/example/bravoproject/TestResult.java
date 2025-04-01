@@ -13,11 +13,15 @@ public class TestResult {
     private int comfortScore; // e.g., 1–5
     private int fatigueScore; // e.g., 1–5
     private String timestamp;
-
     private String feedback;
 
+    private long cpuUsage;
+    private long memoryUsedKB;
 
-    public TestResult(int id, String participantId, String condition, String menuType, long navigationTimeMs, int misclicks, boolean completed, int batteryStart, int batteryEnd, int comfortScore, int fatigueScore, String timestamp) {
+    public TestResult(int id, String participantId, String condition, String menuType, long navigationTimeMs,
+                      int misclicks, boolean completed, int batteryStart, int batteryEnd,
+                      int comfortScore, int fatigueScore, String timestamp, String feedback,
+                      long cpuUsage, long memoryUsedKB) {
         this.id = id;
         this.participantId = participantId;
         this.condition = condition;
@@ -31,10 +35,11 @@ public class TestResult {
         this.fatigueScore = fatigueScore;
         this.timestamp = timestamp;
         this.feedback = feedback;
+        this.cpuUsage = cpuUsage;
+        this.memoryUsedKB = memoryUsedKB;
     }
 
     public TestResult() {
-
     }
 
     public int getId() {
@@ -136,10 +141,24 @@ public class TestResult {
     public String getFeedback() {
         return feedback;
     }
+
     public void setFeedback(String feedback) {
-        this.feedback = feedback; }
+        this.feedback = feedback;
+    }
+
+    public long getCpuUsage() {
+        return cpuUsage;
+    }
+
+    public void setCpuUsage(long cpuUsage) {
+        this.cpuUsage = cpuUsage;
+    }
+
+    public long getMemoryUsedKB() {
+        return memoryUsedKB;
+    }
+
+    public void setMemoryUsedKB(long memoryUsedKB) {
+        this.memoryUsedKB = memoryUsedKB;
+    }
 }
-
-
-
-
