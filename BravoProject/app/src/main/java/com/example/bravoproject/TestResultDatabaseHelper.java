@@ -12,8 +12,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.bravoproject.TestResult;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,7 +23,7 @@ import java.util.List;
 public class TestResultDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Results.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     private Context context;
     private static final String TABLE_NAME = "test_results";
@@ -37,12 +35,8 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_NAV_TIME = "navigation_time_ms";
     private static final String COLUMN_MISCLICKS = "misclicks";
     private static final String COLUMN_COMPLETED = "completed";
-    private static final String COLUMN_BATTERY_START = "battery_start";
-    private static final String COLUMN_BATTERY_END = "battery_end";
-    private static final String COLUMN_COMFORT_SCORE = "comfort_score";
     private static final String COLUMN_FATIGUE_SCORE = "fatigue_score";
     private static final String COLUMN_TIMESTAMP = "timestamp";
-
     private static final String COLUMN_HANDEDNESS = "handedness";
     private static final String COLUMN_FEEDBACK = "feedback";
     private static final String COLUMN_CPU_USAGE = "cpu_usage";
@@ -64,14 +58,11 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
                         COLUMN_NAV_TIME + " INTEGER, " +
                         COLUMN_MISCLICKS + " INTEGER, " +
                         COLUMN_COMPLETED + " INTEGER, " +
-                        COLUMN_BATTERY_START + " INTEGER, " +
-                        COLUMN_BATTERY_END + " INTEGER, " +
-                        COLUMN_COMFORT_SCORE + " INTEGER, " +
                         COLUMN_FATIGUE_SCORE + " INTEGER, " +
-                        COLUMN_HANDEDNESS + " TEXT, "+
                         COLUMN_CPU_USAGE + " INTEGER, " +
                         COLUMN_MEMORY_USED + " INTEGER, " +
                         COLUMN_TIMESTAMP + " TEXT, " +
+                        COLUMN_HANDEDNESS + " TEXT, " +
                         COLUMN_FEEDBACK + " TEXT)";
         db.execSQL(CREATE_TABLE);
     }
@@ -82,10 +73,8 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Insert
     public void insertTestResult(TestResult result) {
         SQLiteDatabase db = this.getWritableDatabase();
-
 
         Cursor cursor = db.query(TABLE_NAME,
                 new String[]{COLUMN_ID},
@@ -109,9 +98,6 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_NAV_TIME, result.getNavigationTimeMs());
         values.put(COLUMN_MISCLICKS, result.getMisclicks());
         values.put(COLUMN_COMPLETED, result.isCompleted() ? 1 : 0);
-        values.put(COLUMN_BATTERY_START, result.getBatteryStart());
-        values.put(COLUMN_BATTERY_END, result.getBatteryEnd());
-        values.put(COLUMN_COMFORT_SCORE, result.getComfortScore());
         values.put(COLUMN_FATIGUE_SCORE, result.getFatigueScore());
         values.put(COLUMN_CPU_USAGE, result.getCpuUsage());
         values.put(COLUMN_MEMORY_USED, result.getMemoryUsedKB());
@@ -120,7 +106,6 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_HANDEDNESS, result.getHandedness());
 
         if (exists) {
-
             db.update(TABLE_NAME, values,
                     COLUMN_PARTICIPANT_ID + "=? AND " +
                             COLUMN_CONDITION + "=? AND " +
@@ -131,15 +116,12 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
                             result.getMenuType()
                     });
         } else {
-            // 없으면 insert
             db.insert(TABLE_NAME, null, values);
         }
 
         db.close();
     }
 
-
-    // Get all
     public List<TestResult> getAllResults() {
         List<TestResult> results = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -156,7 +138,6 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         return results;
     }
 
-    // Get by participant
     public List<TestResult> getResultsByParticipant(String participantId) {
         List<TestResult> results = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -166,8 +147,7 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
 
         if (cursor.moveToFirst()) {
             do {
-                TestResult result = cursorToResult(cursor);
-                results.add(result);
+                results.add(cursorToResult(cursor));
             } while (cursor.moveToNext());
         }
 
@@ -176,14 +156,12 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         return results;
     }
 
-    // Delete all
     public void deleteAllResults() {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_NAME, null, null);
         db.close();
     }
 
-    // Convert cursor row to object
     private TestResult cursorToResult(Cursor cursor) {
         TestResult result = new TestResult();
 
@@ -194,15 +172,11 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         result.setNavigationTimeMs(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_NAV_TIME)));
         result.setMisclicks(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MISCLICKS)));
         result.setCompleted(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_COMPLETED)) == 1);
-        result.setBatteryStart(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BATTERY_START)));
-        result.setBatteryEnd(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BATTERY_END)));
-        result.setComfortScore(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_COMFORT_SCORE)));
         result.setFatigueScore(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_FATIGUE_SCORE)));
         result.setCpuUsage(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CPU_USAGE)));
         result.setMemoryUsedKB(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_MEMORY_USED)));
         result.setTimestamp(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIMESTAMP)));
         result.setHandedness(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_HANDEDNESS)));
-
         result.setFeedback(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FEEDBACK)));
 
         return result;
@@ -210,7 +184,7 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
 
     public boolean isMenuCompleted(String participantId, String condition, String menuType) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query("test_results",
+        Cursor cursor = db.query(TABLE_NAME,
                 new String[]{"id"},
                 "participant_id = ? AND condition = ? AND menu_type = ? AND completed = 1",
                 new String[]{participantId, condition, menuType},
@@ -237,12 +211,10 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         try (FileOutputStream fos = new FileOutputStream(new File(context.getExternalFilesDir(null), "test_results.csv"));
              BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos))) {
 
-            // Write column headers
-            writer.write("participant_id, condition, menu_type, navigation_time_ms, misclicks, cpu_usage, memory_used_kb, comfort_score, fatigue_score, timestamp, handedness, feedback\n");
+            writer.write("participant_id, condition, menu_type, navigation_time_ms, misclicks, cpu_usage, memory_used_kb, fatigue_score, timestamp, handedness, feedback\n");
 
-            // Write data rows
             while (cursor.moveToNext()) {
-                writer.write(String.format("%s, %s, %s, %d, %d, %d, %d, %d, %d, %s, %s, %s\n",
+                writer.write(String.format("%s, %s, %s, %d, %d, %d, %d, %d, %s, %s, %s\n",
                         cursor.getString(cursor.getColumnIndex(COLUMN_PARTICIPANT_ID)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_CONDITION)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_MENU_TYPE)),
@@ -250,7 +222,6 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
                         cursor.getInt(cursor.getColumnIndex(COLUMN_MISCLICKS)),
                         cursor.getLong(cursor.getColumnIndex(COLUMN_CPU_USAGE)),
                         cursor.getLong(cursor.getColumnIndex(COLUMN_MEMORY_USED)),
-                        cursor.getInt(cursor.getColumnIndex(COLUMN_COMFORT_SCORE)),
                         cursor.getInt(cursor.getColumnIndex(COLUMN_FATIGUE_SCORE)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_TIMESTAMP)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_HANDEDNESS)),
@@ -264,5 +235,4 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
 
         cursor.close();
     }
-
 }

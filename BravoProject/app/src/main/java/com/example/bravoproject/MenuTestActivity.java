@@ -139,11 +139,10 @@ public class MenuTestActivity extends AppCompatActivity {
                     result.setHandedness(handedness);
 
                     result.setCompleted(true);
-                    result.setComfortScore(0);
+
                     result.setFatigueScore(fatigue);
                     result.setFeedback(feedback);
-                    result.setBatteryStart(0);
-                    result.setBatteryEnd(0);
+
                     result.setTimestamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
 
                     dbHelper.insertTestResult(result);

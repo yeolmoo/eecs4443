@@ -8,16 +8,13 @@ public class TestResult {
     private long navigationTimeMs;
     private int misclicks;
     private boolean completed;
-    private int batteryStart;
-    private int batteryEnd;
-    private int comfortScore; // e.g., 1–5
     private int fatigueScore; // e.g., 1–5
     private String timestamp;
-
     private String feedback;
-
     private long cpuUsage;
     private long memoryUsedKB;
+    private String handedness;
+
     public String getHandedness() {
         return handedness;
     }
@@ -26,12 +23,8 @@ public class TestResult {
         this.handedness = handedness;
     }
 
-    private String handedness;
-
-
     public TestResult(int id, String participantId, String condition, String menuType, long navigationTimeMs,
-                      int misclicks, boolean completed, int batteryStart, int batteryEnd,
-                      int comfortScore, int fatigueScore, String timestamp, String feedback,
+                      int misclicks, boolean completed, int fatigueScore, String timestamp, String feedback,
                       long cpuUsage, long memoryUsedKB) {
         this.id = id;
         this.participantId = participantId;
@@ -40,9 +33,6 @@ public class TestResult {
         this.navigationTimeMs = navigationTimeMs;
         this.misclicks = misclicks;
         this.completed = completed;
-        this.batteryStart = batteryStart;
-        this.batteryEnd = batteryEnd;
-        this.comfortScore = comfortScore;
         this.fatigueScore = fatigueScore;
         this.timestamp = timestamp;
         this.feedback = feedback;
@@ -50,9 +40,7 @@ public class TestResult {
         this.memoryUsedKB = memoryUsedKB;
     }
 
-    public TestResult() {
-
-    }
+    public TestResult() {}
 
     public int getId() {
         return id;
@@ -108,30 +96,6 @@ public class TestResult {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
-    }
-
-    public int getBatteryStart() {
-        return batteryStart;
-    }
-
-    public void setBatteryStart(int batteryStart) {
-        this.batteryStart = batteryStart;
-    }
-
-    public int getBatteryEnd() {
-        return batteryEnd;
-    }
-
-    public void setBatteryEnd(int batteryEnd) {
-        this.batteryEnd = batteryEnd;
-    }
-
-    public int getComfortScore() {
-        return comfortScore;
-    }
-
-    public void setComfortScore(int comfortScore) {
-        this.comfortScore = comfortScore;
     }
 
     public int getFatigueScore() {
