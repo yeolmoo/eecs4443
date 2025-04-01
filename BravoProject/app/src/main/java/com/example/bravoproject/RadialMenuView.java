@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -147,5 +146,29 @@ public class RadialMenuView extends View {
 
     public interface OnMenuSelectedListener {
         void onMenuSelected(String menu);
+    }
+
+
+    public boolean isMenuOpen() {
+        return isLongPressed;
+    }
+
+
+    public boolean isTouchOnItem(float x, float y, String itemLabel) {
+        if (!isLongPressed) return false;
+
+        float dx = x - centerX;
+        float dy = y - centerY;
+        float distance = (float) Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < 100) return false;
+
+        double angle = Math.toDegrees(Math.atan2(dy, dx));
+        angle = (angle + 360) % 360;
+
+        int index = (int) (angle / (360f / menuItems.size()));
+        if (index < 0 || index >= menuItems.size()) return false;
+
+        return menuItems.get(index).equals(itemLabel);
     }
 }

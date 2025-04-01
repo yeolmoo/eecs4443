@@ -28,6 +28,7 @@ public class HamburgerMenuActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
     private NavigationView navView;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +37,7 @@ public class HamburgerMenuActivity extends AppCompatActivity {
 
         drawerLayout = findViewById(R.id.drawerLayout);
         navView = findViewById(R.id.navView);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
 
@@ -62,31 +63,59 @@ public class HamburgerMenuActivity extends AppCompatActivity {
             long endMemoryUsage = getCurrentMemoryUsageKB();
             long memoryUsed = endMemoryUsage - startMemoryUsage;
 
-            Intent feedbackIntent = new Intent(this, ConditionSelectActivity.class);
-            feedbackIntent.putExtra("feedback_mode", true);
-            feedbackIntent.putExtra("navigation_time", elapsed);
-            feedbackIntent.putExtra("misclicks", misclicks);
-            feedbackIntent.putExtra("menu_type", menuType);
-            feedbackIntent.putExtra("cpu_usage", cpuUsage);
-            feedbackIntent.putExtra("memory_used_kb", memoryUsed);
-            startActivity(feedbackIntent);
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("navigation_time", elapsed);
+            resultIntent.putExtra("misclicks", misclicks);
+            resultIntent.putExtra("menu_type", menuType);
+            resultIntent.putExtra("cpu_usage", cpuUsage);
+            resultIntent.putExtra("memory_used_kb", memoryUsed);
+            setResult(RESULT_OK, resultIntent);
             finish();
+
         }
 
-        drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            View drawerView = drawerLayout.findViewById(R.id.navView);
-            if (!isTouchOnSettingsItem(ev, drawerView)) {
-                misclicks++;
-                Toast.makeText(this, "Misclick recorded", Toast.LENGTH_SHORT).show();
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                View drawerView = drawerLayout.findViewById(R.id.navView);
+                if (!isTouchOnSettingsItem(ev, drawerView)) {
+                    misclicks++;
+                    Toast.makeText(this, "Misclick (drawer area)", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                if (!isTouchOnHamburgerIcon(ev)) {
+                    misclicks++;
+                    Toast.makeText(this, "Misclick (outside menu)", Toast.LENGTH_SHORT).show();
+                }
             }
         }
+
         return super.dispatchTouchEvent(ev);
+    }
+
+    private boolean isTouchOnHamburgerIcon(MotionEvent ev) {
+        if (toolbar == null) return false;
+
+        int[] location = new int[2];
+        toolbar.getLocationOnScreen(location);
+
+        float x = ev.getRawX();
+        float y = ev.getRawY();
+
+        float left = location[0];
+        float top = location[1];
+        float right = left + dpToPx(72);
+        float bottom = top + toolbar.getHeight();
+
+        return x >= left && x <= right && y >= top && y <= bottom;
+    }
+
+    private float dpToPx(float dp) {
+        return dp * getResources().getDisplayMetrics().density;
     }
 
     private boolean isTouchOnSettingsItem(MotionEvent ev, View drawerView) {

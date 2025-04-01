@@ -3,22 +3,21 @@ package com.example.bravoproject;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 public class InstructionActivity extends AppCompatActivity {
+
     private String menuName, menuType, participantId, condition;
 
     private TextView taskText;
     private Button startButton, backButton;
+
+    private static final int MENU_ACTIVITY_REQUEST = 200;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,10 +28,12 @@ public class InstructionActivity extends AppCompatActivity {
         menuType = getIntent().getStringExtra("menu_type");
         participantId = getIntent().getStringExtra("participant_id");
         condition = getIntent().getStringExtra("condition");
+
         taskText = findViewById(R.id.taskText);
         startButton = findViewById(R.id.startButton);
         backButton = findViewById(R.id.backButton);
-        taskText.setText(String.format("Task: use %s to navigate to", menuType));
+
+        taskText.setText(String.format("Task: use %s to navigate to Settings", menuType));
 
         startButton.setOnClickListener(v -> {
             try {
@@ -44,8 +45,7 @@ public class InstructionActivity extends AppCompatActivity {
                 intent.putExtra("menu_name", menuName);
                 intent.putExtra("menu_type", menuType);
                 intent.putExtra("start_time", SystemClock.elapsedRealtime());
-                startActivity(intent);
-                finish();
+                startActivityForResult(intent, MENU_ACTIVITY_REQUEST);
             } catch (ClassNotFoundException e) {
                 Toast.makeText(InstructionActivity.this, "Activity not found: " + menuName, Toast.LENGTH_SHORT).show();
             }
@@ -55,5 +55,16 @@ public class InstructionActivity extends AppCompatActivity {
             setResult(RESULT_CANCELED);
             finish();
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == MENU_ACTIVITY_REQUEST && resultCode == RESULT_OK && data != null) {
+
+            setResult(RESULT_OK, data);
+            finish();
+        }
     }
 }

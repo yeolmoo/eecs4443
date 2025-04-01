@@ -49,8 +49,7 @@ public class SwipeMenuActivity extends AppCompatActivity {
             result.putExtra("navigation_time", elapsed);
             result.putExtra("misclicks", misclicks);
             result.putExtra("menu_type", menuType);
-            setResult(RESULT_OK, result);
-            finish();
+            setResult(RESULT_OK, result);          finish();
         } else {
             misclicks++;
             Toast.makeText(this, "Wrong menu", Toast.LENGTH_SHORT).show();

@@ -28,7 +28,6 @@
         <activity android:name=".BottomNavActivity" />
         <activity android:name=".TopNavActivity" />
         <activity android:name=".FabActivity" />
-        <activity android:name=".SwipeMenuActivity" />
         <activity android:name=".HamburgerMenuActivity" />
         <activity android:name=".RadialMenuActivity" />
         <activity android:name=".InstructionActivity" />

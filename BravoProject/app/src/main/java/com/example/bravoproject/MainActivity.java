@@ -50,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
             editor.putString("name_" + uniqueName, "used");
             editor.apply();
 
+
+
             // Navigate to next page
             Intent intent = new Intent(this, ConditionSelectActivity.class);
             startActivity(intent);
