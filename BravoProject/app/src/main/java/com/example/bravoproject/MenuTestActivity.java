@@ -2,8 +2,10 @@ package com.example.bravoproject;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -41,18 +43,33 @@ public class MenuTestActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         TextView textCondition = findViewById(R.id.textCondition);
-        if (Objects.equals(condition, "sitting")) {
-            textCondition.setText("Sitting Test");
-        } else {
-            textCondition.setText("Walking Test");
-        }
+        textCondition.setText(condition.equals("sitting") ? "Sitting Test" : "Walking Test");
+
+        // Build menu list and mark completion status
+        String[] menuNames = {
+                "Hamburger Menu", "Top Navigation", "Bottom Navigation",
+                "Floating Action Button", "Radial Menu"
+        };
+        String[] classNames = {
+                "HamburgerMenuActivity", "TopNavActivity", "BottomNavActivity",
+                "FabActivity", "RadialMenuActivity"
+        };
+
+        Button buttonBack = findViewById(R.id.buttonBackToCondition);
+        buttonBack.setOnClickListener(v -> {
+            Intent intent = new Intent(MenuTestActivity.this, ConditionSelectActivity.class);
+            intent.putExtra("participant_id", participantId); // optional
+            startActivity(intent);
+            finish();
+        });
 
         menuList = new ArrayList<>();
-        menuList.add(new MenuItem("Hamburger Menu", "HamburgerMenuActivity"));
-        menuList.add(new MenuItem("Top Navigation", "TopNavActivity"));
-        menuList.add(new MenuItem("Bottom Navigation", "BottomNavActivity"));
-        menuList.add(new MenuItem("Floating Action Button", "FabActivity"));
-        menuList.add(new MenuItem("Radial Menu", "RadialMenuActivity"));
+        for (int i = 0; i < menuNames.length; i++) {
+            MenuItem item = new MenuItem(menuNames[i], classNames[i]);
+            item.setCompletedSitting(dbHelper.isMenuCompleted(participantId, "sitting", menuNames[i]));
+            item.setCompletedWalking(dbHelper.isMenuCompleted(participantId, "walking", menuNames[i]));
+            menuList.add(item);
+        }
 
         adapter = new MenuAdapter(this, menuList, participantId, condition);
         recyclerView.setAdapter(adapter);
@@ -116,6 +133,11 @@ public class MenuTestActivity extends AppCompatActivity {
                     result.setMisclicks(misclicks);
                     result.setCpuUsage(cpuUsage);
                     result.setMemoryUsedKB(memoryUsedKb);
+
+                    SharedPreferences prefs = getSharedPreferences("ParticipantPrefs", MODE_PRIVATE);
+                    String handedness = prefs.getString("handedness_" + participantId, "Unknown");
+                    result.setHandedness(handedness);
+
                     result.setCompleted(true);
                     result.setComfortScore(0);
                     result.setFatigueScore(fatigue);
@@ -126,6 +148,8 @@ public class MenuTestActivity extends AppCompatActivity {
 
                     dbHelper.insertTestResult(result);
                     Toast.makeText(this, "Result saved!", Toast.LENGTH_SHORT).show();
+
+                    recreate(); // reload UI to show updated completion state
                 })
                 .setCancelable(false)
                 .show();

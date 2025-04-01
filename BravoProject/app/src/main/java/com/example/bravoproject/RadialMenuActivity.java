@@ -59,11 +59,12 @@ public class RadialMenuActivity extends AppCompatActivity {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_UP) {
+
             if (!selectionHandled && !isTouchOnSettings(ev)) {
                 misclicks++;
                 Toast.makeText(this, "Misclick recorded", Toast.LENGTH_SHORT).show();
             }
-            selectionHandled = false; // Reset for next interaction
+            selectionHandled = false;
         }
         return super.dispatchTouchEvent(ev);
     }

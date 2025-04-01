@@ -24,8 +24,8 @@ import java.util.List;
 
 public class TestResultDatabaseHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "test_results.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final String DATABASE_NAME = "Results.db";
+    private static final int DATABASE_VERSION = 1;
 
     private Context context;
     private static final String TABLE_NAME = "test_results";
@@ -69,7 +69,6 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
                         COLUMN_COMFORT_SCORE + " INTEGER, " +
                         COLUMN_FATIGUE_SCORE + " INTEGER, " +
                         COLUMN_HANDEDNESS + " TEXT, "+
-                        COLUMN_TIMESTAMP + " TEXT, "+
                         COLUMN_CPU_USAGE + " INTEGER, " +
                         COLUMN_MEMORY_USED + " INTEGER, " +
                         COLUMN_TIMESTAMP + " TEXT, " +
@@ -86,8 +85,24 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
     // Insert
     public void insertTestResult(TestResult result) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
 
+
+        Cursor cursor = db.query(TABLE_NAME,
+                new String[]{COLUMN_ID},
+                COLUMN_PARTICIPANT_ID + "=? AND " +
+                        COLUMN_CONDITION + "=? AND " +
+                        COLUMN_MENU_TYPE + "=?",
+                new String[]{
+                        result.getParticipantId(),
+                        result.getCondition(),
+                        result.getMenuType()
+                },
+                null, null, null);
+
+        boolean exists = cursor.moveToFirst();
+        cursor.close();
+
+        ContentValues values = new ContentValues();
         values.put(COLUMN_PARTICIPANT_ID, result.getParticipantId());
         values.put(COLUMN_CONDITION, result.getCondition());
         values.put(COLUMN_MENU_TYPE, result.getMenuType());
@@ -102,11 +117,27 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_MEMORY_USED, result.getMemoryUsedKB());
         values.put(COLUMN_TIMESTAMP, result.getTimestamp());
         values.put(COLUMN_FEEDBACK, result.getFeedback());
-
         values.put(COLUMN_HANDEDNESS, result.getHandedness());
-        db.insert(TABLE_NAME, null, values);
+
+        if (exists) {
+
+            db.update(TABLE_NAME, values,
+                    COLUMN_PARTICIPANT_ID + "=? AND " +
+                            COLUMN_CONDITION + "=? AND " +
+                            COLUMN_MENU_TYPE + "=?",
+                    new String[]{
+                            result.getParticipantId(),
+                            result.getCondition(),
+                            result.getMenuType()
+                    });
+        } else {
+            // 없으면 insert
+            db.insert(TABLE_NAME, null, values);
+        }
+
         db.close();
     }
+
 
     // Get all
     public List<TestResult> getAllResults() {
@@ -177,8 +208,21 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
+    public boolean isMenuCompleted(String participantId, String condition, String menuType) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query("test_results",
+                new String[]{"id"},
+                "participant_id = ? AND condition = ? AND menu_type = ? AND completed = 1",
+                new String[]{participantId, condition, menuType},
+                null, null, null);
+
+        boolean exists = cursor.moveToFirst();
+        cursor.close();
+        db.close();
+        return exists;
+    }
+
     public void exportToCSV() {
-        // Check if permission is granted (for Android 6.0 and above)
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
 
@@ -193,15 +237,12 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         try (FileOutputStream fos = new FileOutputStream(new File(context.getExternalFilesDir(null), "test_results.csv"));
              BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos))) {
 
-            writer.write("participant_id, condition, menu_type, navigation_time_ms, misclicks, cpu_usage_ms, memory_used_kb, comfort_score, fatigue_score, timestamp, feedback\n");
+            // Write column headers
+            writer.write("participant_id, condition, menu_type, navigation_time_ms, misclicks, cpu_usage, memory_used_kb, comfort_score, fatigue_score, timestamp, handedness, feedback\n");
 
-            // write column headers
-            writer.write("participant_id, condition, menu_type, navigation_time_ms, misclicks, comfort_score, fatigue_score, timestamp, handedness\n");
-
-
-            // write data rows
+            // Write data rows
             while (cursor.moveToNext()) {
-                writer.write(String.format("%s, %s, %s, %d, %d, %d, %d, %d, %d, %s, %s\n",
+                writer.write(String.format("%s, %s, %s, %d, %d, %d, %d, %d, %d, %s, %s, %s\n",
                         cursor.getString(cursor.getColumnIndex(COLUMN_PARTICIPANT_ID)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_CONDITION)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_MENU_TYPE)),
@@ -212,21 +253,9 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
                         cursor.getInt(cursor.getColumnIndex(COLUMN_COMFORT_SCORE)),
                         cursor.getInt(cursor.getColumnIndex(COLUMN_FATIGUE_SCORE)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_TIMESTAMP)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_HANDEDNESS)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_FEEDBACK))
                 ));
-                String participantId = cursor.getString(cursor.getColumnIndex("participant_id"));
-                String condition = cursor.getString(cursor.getColumnIndex("condition"));
-                String menuType = cursor.getString(cursor.getColumnIndex("menu_type"));
-                long navigationTime = cursor.getLong(cursor.getColumnIndex("navigation_time_ms"));
-                int misclicks = cursor.getInt(cursor.getColumnIndex("misclicks"));
-                int comfortScore = cursor.getInt(cursor.getColumnIndex("comfort_score"));
-                int fatigueScore = cursor.getInt(cursor.getColumnIndex("fatigue_score"));
-                String timestamp = cursor.getString(cursor.getColumnIndex("timestamp"));
-
-                String handedness = cursor.getString(cursor.getColumnIndex("Handedness"));
-
-                writer.write(String.format("%s, %s, %s, %d, %d, %d, %d, %s, %s\n",
-                        participantId, condition, menuType, navigationTime, misclicks, comfortScore, fatigueScore, timestamp, handedness));
             }
 
         } catch (IOException e) {
@@ -235,4 +264,5 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
 
         cursor.close();
     }
+
 }

@@ -12,10 +12,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.bravoproject.MenuTestActivity;
-import com.example.bravoproject.R;
-import com.example.bravoproject.MenuItem;
-
 import java.util.List;
 
 public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder> {
@@ -42,12 +38,21 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
     @Override
     public void onBindViewHolder(@NonNull MenuViewHolder holder, int position) {
         MenuItem item = menuList.get(position);
-        holder.textMenuName.setText(item.getMenuName());
+
+        String menuName = item.getMenuName();
+        boolean isCompleted = condition.equals("sitting")
+                ? item.isCompletedSitting()
+                : item.isCompletedWalking();
+
+        // Add completion marker if applicable
+        if (isCompleted) {
+            menuName += " (✔ Completed)";
+        }
+
+        holder.textMenuName.setText(menuName);
 
         holder.itemView.setOnClickListener(v -> {
             try {
-//                Class<?> activityClass = Class.forName("com.example.bravoproject." + item.getActivityClassName());
-//                Intent intent = new Intent(context, activityClass);
                 Intent intent = new Intent(context, InstructionActivity.class);
                 intent.putExtra("participant_id", participantId);
                 intent.putExtra("condition", condition);
@@ -56,7 +61,6 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
                 intent.putExtra("start_time", SystemClock.elapsedRealtime());
 
                 ((MenuTestActivity) context).startActivityForResult(intent, 100);
-//                ClassNotFoundException
             } catch (Exception e) {
                 Toast.makeText(context, "Activity not found: " + item.getActivityClassName(), Toast.LENGTH_SHORT).show();
             }
