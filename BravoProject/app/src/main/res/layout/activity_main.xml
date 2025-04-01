@@ -14,6 +14,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <RadioGroup
+        android:id="@+id/handednessGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radioLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Left-handed" />
+
+        <RadioButton
+            android:id="@+id/radioRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Right-handed" />
+    </RadioGroup>
+
+
     <Button
         android:id="@+id/buttonNext"
         android:text="Continue"
@@ -29,5 +49,7 @@
         android:layout_centerInParent="true"
         android:layout_marginTop="50dp"
         android:padding="16dp"/>
+
+
 
 </LinearLayout>

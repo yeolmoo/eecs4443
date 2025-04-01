@@ -13,10 +13,21 @@ public class TestResult {
     private int comfortScore; // e.g., 1–5
     private int fatigueScore; // e.g., 1–5
     private String timestamp;
+
     private String feedback;
 
     private long cpuUsage;
     private long memoryUsedKB;
+    public String getHandedness() {
+        return handedness;
+    }
+
+    public void setHandedness(String handedness) {
+        this.handedness = handedness;
+    }
+
+    private String handedness;
+
 
     public TestResult(int id, String participantId, String condition, String menuType, long navigationTimeMs,
                       int misclicks, boolean completed, int batteryStart, int batteryEnd,
@@ -40,6 +51,7 @@ public class TestResult {
     }
 
     public TestResult() {
+
     }
 
     public int getId() {
