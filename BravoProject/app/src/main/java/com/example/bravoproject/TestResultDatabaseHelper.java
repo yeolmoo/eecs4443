@@ -8,6 +8,8 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -196,25 +198,27 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         return exists;
     }
 
-    public void exportToCSV() {
+    public String exportToCSV() {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-
             ActivityCompat.requestPermissions((Activity) context,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-            return;
+            return null;
         }
+
+        File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File file = new File(downloadDir, "test_results.csv");
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME, null);
 
-        try (FileOutputStream fos = new FileOutputStream(new File(context.getExternalFilesDir(null), "test_results.csv"));
+        try (FileOutputStream fos = new FileOutputStream(file);
              BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos))) {
 
-            writer.write("participant_id, condition, menu_type, navigation_time_ms, misclicks, cpu_usage, memory_used_kb, fatigue_score, timestamp, handedness, feedback\n");
+            writer.write("participant_id,condition,menu_type,navigation_time_ms,misclicks,cpu_usage,memory_used_kb,fatigue_score,timestamp,handedness,feedback\n");
 
             while (cursor.moveToNext()) {
-                writer.write(String.format("%s, %s, %s, %d, %d, %d, %d, %d, %s, %s, %s\n",
+                writer.write(String.format("%s,%s,%s,%d,%d,%d,%d,%d,%s,%s,%s\n",
                         cursor.getString(cursor.getColumnIndex(COLUMN_PARTICIPANT_ID)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_CONDITION)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_MENU_TYPE)),
@@ -229,10 +233,14 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
                 ));
             }
 
+            cursor.close();
+            return file.getAbsolutePath();
+
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
-
-        cursor.close();
     }
+
+
 }

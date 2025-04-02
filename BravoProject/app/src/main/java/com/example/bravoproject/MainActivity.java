@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
     private RadioButton radioLeft, radioRight;
     private EditText editFirstName;
     private Button buttonNext;
-    private Button buttonDownloadData;
+  //  private Button buttonDownloadData;
 
     private static final String PREFS_NAME = "ParticipantPrefs";
 
@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         radioRight = findViewById(R.id.radioRight);
         editFirstName = findViewById(R.id.editFirstName);
         buttonNext = findViewById(R.id.buttonNext);
-        buttonDownloadData = findViewById(R.id.buttonDownloadData);
+       // buttonDownloadData = findViewById(R.id.buttonDownloadData);
 
         buttonNext.setOnClickListener(v -> {
             String name = editFirstName.getText().toString().trim();
@@ -69,9 +69,9 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        buttonDownloadData.setOnClickListener(v -> {
-            downloadDataAsCSV();
-        });
+//        buttonDownloadData.setOnClickListener(v -> {
+//            downloadDataAsCSV();
+//        });
 
         editFirstName.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -85,9 +85,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void downloadDataAsCSV() {
-        TestResultDatabaseHelper dbHelper = new TestResultDatabaseHelper(this);
-        dbHelper.exportToCSV();
-        Toast.makeText(this, "Data exported to CSV", Toast.LENGTH_SHORT).show();
-    }
+//    private void downloadDataAsCSV() {
+//        TestResultDatabaseHelper dbHelper = new TestResultDatabaseHelper(this);
+//        String filePath = dbHelper.exportToCSV();
+//
+//        if (filePath != null) {
+//            Toast.makeText(this, "Data exported to:\n" + filePath, Toast.LENGTH_LONG).show();
+//        } else {
+//            Toast.makeText(this, "Export failed", Toast.LENGTH_SHORT).show();
+//        }
+//    }
+
 }
