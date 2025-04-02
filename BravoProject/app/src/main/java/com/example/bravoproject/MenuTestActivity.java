@@ -143,7 +143,6 @@ public class MenuTestActivity extends AppCompatActivity {
                     result.setFatigueScore(fatigue);
                     result.setFeedback(feedback);
 
-                    result.setTimestamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
 
                     dbHelper.insertTestResult(result);
                     Toast.makeText(this, "Result saved!", Toast.LENGTH_SHORT).show();

@@ -38,7 +38,7 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_MISCLICKS = "misclicks";
     private static final String COLUMN_COMPLETED = "completed";
     private static final String COLUMN_FATIGUE_SCORE = "fatigue_score";
-    private static final String COLUMN_TIMESTAMP = "timestamp";
+
     private static final String COLUMN_HANDEDNESS = "handedness";
     private static final String COLUMN_FEEDBACK = "feedback";
     private static final String COLUMN_CPU_USAGE = "cpu_usage";
@@ -63,7 +63,6 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
                         COLUMN_FATIGUE_SCORE + " INTEGER, " +
                         COLUMN_CPU_USAGE + " INTEGER, " +
                         COLUMN_MEMORY_USED + " INTEGER, " +
-                        COLUMN_TIMESTAMP + " TEXT, " +
                         COLUMN_HANDEDNESS + " TEXT, " +
                         COLUMN_FEEDBACK + " TEXT)";
         db.execSQL(CREATE_TABLE);
@@ -103,7 +102,6 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_FATIGUE_SCORE, result.getFatigueScore());
         values.put(COLUMN_CPU_USAGE, result.getCpuUsage());
         values.put(COLUMN_MEMORY_USED, result.getMemoryUsedKB());
-        values.put(COLUMN_TIMESTAMP, result.getTimestamp());
         values.put(COLUMN_FEEDBACK, result.getFeedback());
         values.put(COLUMN_HANDEDNESS, result.getHandedness());
 
@@ -177,7 +175,6 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
         result.setFatigueScore(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_FATIGUE_SCORE)));
         result.setCpuUsage(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CPU_USAGE)));
         result.setMemoryUsedKB(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_MEMORY_USED)));
-        result.setTimestamp(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIMESTAMP)));
         result.setHandedness(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_HANDEDNESS)));
         result.setFeedback(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FEEDBACK)));
 
@@ -227,7 +224,6 @@ public class TestResultDatabaseHelper extends SQLiteOpenHelper {
                         cursor.getLong(cursor.getColumnIndex(COLUMN_CPU_USAGE)),
                         cursor.getLong(cursor.getColumnIndex(COLUMN_MEMORY_USED)),
                         cursor.getInt(cursor.getColumnIndex(COLUMN_FATIGUE_SCORE)),
-                        cursor.getString(cursor.getColumnIndex(COLUMN_TIMESTAMP)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_HANDEDNESS)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_FEEDBACK))
                 ));

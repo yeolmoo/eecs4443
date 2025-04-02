@@ -9,7 +9,7 @@ public class TestResult {
     private int misclicks;
     private boolean completed;
     private int fatigueScore; // e.g., 1–5
-    private String timestamp;
+
     private String feedback;
     private long cpuUsage;
     private long memoryUsedKB;
@@ -24,7 +24,7 @@ public class TestResult {
     }
 
     public TestResult(int id, String participantId, String condition, String menuType, long navigationTimeMs,
-                      int misclicks, boolean completed, int fatigueScore, String timestamp, String feedback,
+                      int misclicks, boolean completed, int fatigueScore,  String feedback,
                       long cpuUsage, long memoryUsedKB) {
         this.id = id;
         this.participantId = participantId;
@@ -34,7 +34,7 @@ public class TestResult {
         this.misclicks = misclicks;
         this.completed = completed;
         this.fatigueScore = fatigueScore;
-        this.timestamp = timestamp;
+
         this.feedback = feedback;
         this.cpuUsage = cpuUsage;
         this.memoryUsedKB = memoryUsedKB;
@@ -106,13 +106,7 @@ public class TestResult {
         this.fatigueScore = fatigueScore;
     }
 
-    public String getTimestamp() {
-        return timestamp;
-    }
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
 
     public String getFeedback() {
         return feedback;
